@@ -1,0 +1,23 @@
+{
+  "name": "emico-bot-twitch",
+  "version": "1.0.0",
+  "description": "A chat bot for Emico Mirari's Twitch channel that can run custom commands.",
+  "homepage": "https://github.com/emersonds/emico-bot-twitch#readme",
+  "bugs": {
+    "url": "https://github.com/emersonds/emico-bot-twitch/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emersonds/emico-bot-twitch.git"
+  },
+  "license": "MIT",
+  "author": "Dylan Emerson",
+  "type": "commonjs",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  }
+}
