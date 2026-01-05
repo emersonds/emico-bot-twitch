@@ -16,4 +16,4 @@ EmicoBot is a Twitch chat bot designed for [Emico Mirari's Twitch stream](https:
 For now, EmicoBot is specific to Emico Mirari's stream, with no plans to make the bot public. However, most of the code is free and open-source in this repository under the MIT license.
 
 ## License
-This chat bot and it's code is licensed under the MIT license. Anyone is allowed is to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of this chat bot. Please see [LICENSE](LICENSE) for more information.
+This chat bot and its code is licensed under the MIT license. Anyone is allowed is to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of this chat bot. Please see [LICENSE](LICENSE) for more information.
