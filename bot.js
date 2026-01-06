@@ -1,10 +1,12 @@
 import WebSocket from 'ws';
+import dotenv from "dotenv";
+dotenv.config()
 
-const BOT_USER_ID = 'CHANGE_ME_TO_YOUR_BOTS_USER_ID'; // This is the User ID of the chat bot
-const OAUTH_TOKEN = 'CHANGE_ME_TO_YOUR_OAUTH_TOKEN'; // Needs scopes user:bot, user:read:chat, user:write:chat
-const CLIENT_ID = 'CHANGE_ME_TO_YOUR_CLIENT_ID';
+const BOT_USER_ID = '1416350263'; // This is the User ID of the chat bot (emicobot)
+const OAUTH_TOKEN = process.env.OAUTH_TOKEN; // Needs scopes user:bot, user:read:chat, user:write:chat
+const CLIENT_ID = process.env.CLIENT_ID;
 
-const CHAT_CHANNEL_USER_ID = 'CHANGE_ME_TO_THE_CHAT_CHANNELS_USER_ID'; // This is the User ID of the channel that the bot will join and listen to chat messages of
+const CHAT_CHANNEL_USER_ID = '1395627822'; // This is the User ID of the channel that the bot will join and listen to chat messages of (EmicoMirari)
 
 const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
 
