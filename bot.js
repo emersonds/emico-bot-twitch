@@ -10,6 +10,9 @@ const CHAT_CHANNEL_USER_ID = '1395627822'; // This is the User ID of the channel
 
 const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
 
+const COMMANDS = [ "!socials", "!discord" ]
+
+var chatCommand;
 var websocketSessionID;
 
 // Start executing the bot from here
@@ -72,16 +75,32 @@ function handleWebSocketMessage(data) {
 					// First, print the message to the program's console.
 					console.log(`MSG #${data.payload.event.broadcaster_user_login} <${data.payload.event.chatter_user_login}> ${data.payload.event.message.text}`);
 
-					// Then check to see if that message was "HeyGuys"
-					if (data.payload.event.message.text.trim() == "HeyGuys") {
-						// If so, send back "VoHiYo" to the chatroom
-						sendChatMessage("VoHiYo")
+					// Then check to see if that message is a command
+					if (COMMANDS.includes(data.payload.event.message.text.trim())) {
+						handleCommands(data.payload.event.message.text.trim());
 					}
 
 					break;
 			}
 			break;
 	}
+}
+
+// Responds to a chat command with the expected output
+function handleCommands(chatMessage) {
+	// TODO: change COMMANDS to a dictionary and asssign command/output to key/val pairs for future, more complex commands
+	var output;
+
+	switch (chatMessage) {
+		case COMMANDS[0]:	// socials
+			output = "You can find all of Emico's socials on her Carrd! https://emicomirari.carrd.co/";
+			break;
+		case COMMANDS[1]:	// discord
+			output = "Want to hang out and chat with Emico and the Emigos outside of the stream? Join Emico's Discord! https://discord.gg/7qUXMBQktQ";
+			break;
+	}
+
+	sendChatMessage(output);
 }
 
 async function sendChatMessage(chatMessage) {
