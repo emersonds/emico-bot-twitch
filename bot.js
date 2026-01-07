@@ -10,7 +10,11 @@ const CHAT_CHANNEL_USER_ID = '1395627822'; // This is the User ID of the channel
 
 const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
 
-const COMMANDS = [ "!socials", "!discord" ]
+let COMMANDS_DICTIONARY = new Map();
+COMMANDS_DICTIONARY.set("!socials", "You can find all of Emico's socials on her Carrd! https://emicomirari.carrd.co/");
+COMMANDS_DICTIONARY.set("!discord", "Want to hang out and chat with Emico and the Emigos outside of the stream? Join Emico's Discord! https://discord.gg/7qUXMBQktQ");
+//COMMANDS_DICTIONARY.set("!shoutout", "");
+COMMANDS_DICTIONARY.set("!quote", "quote");
 
 var chatCommand;
 var websocketSessionID;
@@ -76,7 +80,7 @@ function handleWebSocketMessage(data) {
 					console.log(`MSG #${data.payload.event.broadcaster_user_login} <${data.payload.event.chatter_user_login}> ${data.payload.event.message.text}`);
 
 					// Then check to see if that message is a command
-					if (COMMANDS.includes(data.payload.event.message.text.trim())) {
+					if (COMMANDS_DICTIONARY.has(data.payload.event.message.text.trim())) {
 						handleCommands(data.payload.event.message.text.trim());
 					}
 
@@ -88,19 +92,16 @@ function handleWebSocketMessage(data) {
 
 // Responds to a chat command with the expected output
 function handleCommands(chatMessage) {
-	// TODO: change COMMANDS to a dictionary and asssign command/output to key/val pairs for future, more complex commands
-	var output;
-
-	switch (chatMessage) {
-		case COMMANDS[0]:	// socials
-			output = "You can find all of Emico's socials on her Carrd! https://emicomirari.carrd.co/";
+	let output = COMMANDS_DICTIONARY.get(chatMessage);
+	
+	switch (output) {
+		case "quote":
+			//
 			break;
-		case COMMANDS[1]:	// discord
-			output = "Want to hang out and chat with Emico and the Emigos outside of the stream? Join Emico's Discord! https://discord.gg/7qUXMBQktQ";
+		default:
+			sendChatMessage(output)
 			break;
 	}
-
-	sendChatMessage(output);
 }
 
 async function sendChatMessage(chatMessage) {
