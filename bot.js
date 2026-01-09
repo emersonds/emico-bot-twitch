@@ -40,10 +40,27 @@ async function getAuth() {
 	});
 
 	if (response.status != 200) {
+		if (response.status == 401) {
+			// TODO: Handle expired tokens and refresh
+			// https://dev.twitch.tv/docs/authentication/refresh-tokens
+			// HTTP POST request with fetch:
+			// https://stackoverflow.com/a/47065313
+			// Update .env file with fs os
+			// https://stackoverflow.com/a/65001580
+			let newResponse = fetch('https://id.twitch.tv/oauth2/token', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				}
+				// body: JSON with client id, secret, refresh token?
+			});
+		}
+		else {
 		let data = await response.json();
 		console.error("Token is not valid. /oauth2/validate returned status code " + response.status);
 		console.error(data);
 		process.exit(1);
+		}
 	}
 
 	console.log("Validated token.");
