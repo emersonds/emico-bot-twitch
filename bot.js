@@ -2,6 +2,7 @@ import WebSocket from 'ws';
 import os from 'os';
 import fs from 'fs';
 import dotenv from "dotenv";
+import { URLSearchParams } from 'url';
 dotenv.config()
 
 const BOT_USER_ID = '1416350263'; // This is the User ID of the chat bot (emicobot)
@@ -44,6 +45,7 @@ async function getAuth() {
 	if (response.status != 200) {
 		if (response.status == 401) {
 			refreshOauthToken();
+			getAuth();
 		}
 		else {
 		let data = await response.json();
@@ -164,6 +166,10 @@ async function registerEventSubListeners() {
 	});
 
 	if (response.status != 202) {
+		if (response.status == 401) {
+			refreshOauthToken();
+			registerEventSubListeners();
+		}
 		let data = await response.json();
 		console.error("Failed to subscribe to channel.chat.message. API call returned status code " + response.status);
 		console.error(data);
@@ -174,8 +180,8 @@ async function registerEventSubListeners() {
 	}
 }
 
-async function refreshOauthToken()
-{
+async function refreshOauthToken() {
+	console.log("Entered refreshOauth");
 	// Set secret data to request key refresh
 	let botData = {
 		client_id: process.env.CLIENT_ID,
@@ -184,23 +190,24 @@ async function refreshOauthToken()
 		refresh_token: process.env.REFRESH_OAUTH_TOKEN
 	};
 
-	// TODO: Handle expired tokens and refresh
-	// https://dev.twitch.tv/docs/authentication/refresh-tokens
-	// HTTP POST request with fetch:
-	// https://stackoverflow.com/a/47065313
-	// Update .env file with fs os
-	// https://stackoverflow.com/a/65001580
-	let response = await fetch('https://id.twitch.tv/oauth2/token', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-		body: JSON.stringify(botData)
-	}).then(response => {
-		if (response.ok) return response.json();
-	}).then(json => {
-		// Set env variables with new tokens
+	try {
+		let response = await fetch('https://id.twitch.tv/oauth2/token', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: new URLSearchParams(botData)
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		let json = await response.json();
+
 		setEnvValue("OAUTH_TOKEN", json.access_token);
 		setEnvValue("REFRESH_OAUTH_TOKEN", json.refresh_token);
-	});
+	} catch (error) {
+		console.error('Error fetching token:', error);
+	}
 }
 
 
