@@ -1,9 +1,8 @@
 import WebSocket from 'ws';
+import os from 'os';
+import fs from 'fs';
 import dotenv from "dotenv";
 dotenv.config()
-
-const fs = require("fs");
-const os = require("os");
 
 const BOT_USER_ID = '1416350263'; // This is the User ID of the chat bot (emicobot)
 const OAUTH_TOKEN = process.env.OAUTH_TOKEN; // Needs scopes user:bot, user:read:chat, user:write:chat
