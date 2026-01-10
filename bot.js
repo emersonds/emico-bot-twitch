@@ -2,6 +2,9 @@ import WebSocket from 'ws';
 import dotenv from "dotenv";
 dotenv.config()
 
+const fs = require("fs");
+const os = require("os");
+
 const BOT_USER_ID = '1416350263'; // This is the User ID of the chat bot (emicobot)
 const OAUTH_TOKEN = process.env.OAUTH_TOKEN; // Needs scopes user:bot, user:read:chat, user:write:chat
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -41,19 +44,7 @@ async function getAuth() {
 
 	if (response.status != 200) {
 		if (response.status == 401) {
-			// TODO: Handle expired tokens and refresh
-			// https://dev.twitch.tv/docs/authentication/refresh-tokens
-			// HTTP POST request with fetch:
-			// https://stackoverflow.com/a/47065313
-			// Update .env file with fs os
-			// https://stackoverflow.com/a/65001580
-			let newResponse = fetch('https://id.twitch.tv/oauth2/token', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				}
-				// body: JSON with client id, secret, refresh token?
-			});
+			refreshOauthToken();
 		}
 		else {
 		let data = await response.json();
@@ -177,4 +168,53 @@ async function registerEventSubListeners() {
 		const data = await response.json();
 		console.log(`Subscribed to channel.chat.message [${data.data[0].id}]`);
 	}
+}
+
+async function refreshOauthToken()
+{
+	// Set secret data to request key refresh
+	let botData = {
+		client_id: process.env.CLIENT_ID,
+		client_secret: process.env.CLIENT_SECRET,
+		grant_type: "refresh_token",
+		refresh_token: process.env.REFRESH_OAUTH_TOKEN
+	};
+
+	// TODO: Handle expired tokens and refresh
+	// https://dev.twitch.tv/docs/authentication/refresh-tokens
+	// HTTP POST request with fetch:
+	// https://stackoverflow.com/a/47065313
+	// Update .env file with fs os
+	// https://stackoverflow.com/a/65001580
+	let response = await fetch('https://id.twitch.tv/oauth2/token', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+		body: JSON.stringify(botData)
+	}).then(response => {
+		if (response.ok) return response.json;
+	});
+
+	// Set env variables with new tokens
+	setEnvValue("OAUTH_TOKEN", response.access_token);
+	setEnvValue("REFRESH_OAUTH_TOKEN", response.refresh_token);
+}
+
+
+// Credit to Marc on stackoverflow https://stackoverflow.com/a/65001580
+function setEnvValue(key, value) {
+
+    // read file from hdd & split if from a linebreak to a array
+    const ENV_VARS = fs.readFileSync("./.env", "utf8").split(os.EOL);
+
+    // find the env we want based on the key
+    const target = ENV_VARS.indexOf(ENV_VARS.find((line) => {
+        return line.match(new RegExp(key));
+    }));
+
+    // replace the key/value with the new value
+    ENV_VARS.splice(target, 1, `${key}=${value}`);
+
+    // write everything back to the file system
+    fs.writeFileSync("./.env", ENV_VARS.join(os.EOL));
+
 }
