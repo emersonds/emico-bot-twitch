@@ -182,19 +182,19 @@ async function registerEventSubListeners() {
 
 async function refreshOauthToken() {
 	console.log("Entered refreshOauth");
-	// Set secret data to request key refresh
-	let botData = {
+	// Set up URLParams for POST request
+	let botData = new URLSearchParams({
 		client_id: process.env.CLIENT_ID,
 		client_secret: process.env.CLIENT_SECRET,
-		grant_type: "refresh_token",
-		refresh_token: process.env.REFRESH_OAUTH_TOKEN
-	};
+		refresh_token: process.env.REFRESH_OAUTH_TOKEN,
+		grant_type: "refresh_token"
+	});
 
 	try {
 		let response = await fetch('https://id.twitch.tv/oauth2/token', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-			body: new URLSearchParams(botData)
+			body: botData.toString()
 		});
 
 		if (!response.ok) {
