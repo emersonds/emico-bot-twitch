@@ -127,9 +127,14 @@ async function sendChatMessage(chatMessage) {
 	});
 
 	if (response.status != 200) {
-		let data = await response.json();
-		console.error("Failed to send chat message");
-		console.error(data);
+		if (response.stats == 401) {
+			refreshOauthToken();
+			sendChatMessage(chatMessage);
+		} else {
+			let data = await response.json();
+			console.error("Failed to send chat message");
+			console.error(data);
+		}
 	} else {
 		console.log("Sent chat message: " + chatMessage);
 	}
