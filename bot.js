@@ -195,12 +195,12 @@ async function refreshOauthToken()
 		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 		body: JSON.stringify(botData)
 	}).then(response => {
-		if (response.ok) return response.json;
+		if (response.ok) return response.json();
+	}).then(json => {
+		// Set env variables with new tokens
+		setEnvValue("OAUTH_TOKEN", json.access_token);
+		setEnvValue("REFRESH_OAUTH_TOKEN", json.refresh_token);
 	});
-
-	// Set env variables with new tokens
-	setEnvValue("OAUTH_TOKEN", response.access_token);
-	setEnvValue("REFRESH_OAUTH_TOKEN", response.refresh_token);
 }
 
 
