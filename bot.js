@@ -16,10 +16,9 @@ const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
 let COMMANDS_DICTIONARY = new Map();
 COMMANDS_DICTIONARY.set("!socials", "You can find all of Emico's socials on her Carrd! https://emicomirari.carrd.co/");
 COMMANDS_DICTIONARY.set("!discord", "Want to hang out and chat with Emico and the Emigos outside of the stream? Join Emico's Discord! https://discord.gg/7qUXMBQktQ");
-//COMMANDS_DICTIONARY.set("!shoutout", "");
+COMMANDS_DICTIONARY.set("!contraption", "contraption");
 COMMANDS_DICTIONARY.set("!quote", "quote");
 
-var chatCommand;
 var websocketSessionID;
 
 // Start executing the bot from here
@@ -105,6 +104,11 @@ function handleCommands(chatMessage) {
 	
 	switch (output) {
 		case "quote":
+			// TODO: Add quote command
+			// This will require setting up a database to keep
+			// track of all of the quotes and their IDs.
+			break;
+		case "contraption":
 			//
 			break;
 		default:
@@ -180,8 +184,12 @@ async function registerEventSubListeners() {
 	}
 }
 
+
+// Refreshes the OAuth token with the provided refresh token
+// Send an HTTPS POST request with botData and parses response to .env
 async function refreshOauthToken() {
-	console.log("Entered refreshOauth");
+	//console.log("Entered refreshOauth");
+
 	// Set up URLParams for POST request
 	let botData = new URLSearchParams({
 		client_id: process.env.CLIENT_ID,
@@ -190,17 +198,21 @@ async function refreshOauthToken() {
 		grant_type: "refresh_token"
 	});
 
+	// Try refreshing OAuth token
 	try {
+		// HTTPS POST request
 		let response = await fetch('https://id.twitch.tv/oauth2/token', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 			body: botData.toString()
 		});
 
+		// Log errors
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`);
+			throw new Error(`HTTP error! status: ${response.status}\n${response.message}`);
 		}
 
+		// Parse json and update .env file
 		let json = await response.json();
 
 		setEnvValue("OAUTH_TOKEN", json.access_token);
@@ -211,6 +223,7 @@ async function refreshOauthToken() {
 }
 
 
+// Updates .env file values using a regex.
 // Credit to Marc on stackoverflow https://stackoverflow.com/a/65001580
 function setEnvValue(key, value) {
 
@@ -227,5 +240,31 @@ function setEnvValue(key, value) {
 
     // write everything back to the file system
     fs.writeFileSync("./.env", ENV_VARS.join(os.EOL));
+}
 
+
+// Gimmick command that "locks" a user in a contraption
+// Just used as a meme in chat, does not actually do anything negative
+function commandContraption(chatMessage) {
+	// Remove "!contraption"
+	const newStr = chatMessage.splice(12);
+
+	// Split message to get each trapped user, where " " is the separator
+	const trappedUsers = newStr.split(" ");
+
+	// Final string
+	var output = "";
+
+	// If multiple users are being put in the contraption
+	if (trappedUsers.length > 1) {
+		for (var i = 0; i < trappedUsers.length; i++) {
+			output += trappedUsers[i] + ", ";
+		}
+		output += "and " + trappedUsers.at(-1) + " have been thrown into the Contraption™!";
+	}
+	else {
+		output = trappedUsers[0] + " has been thrown into the Contraption™!";
+	}
+
+	sendChatMessage(output);
 }
