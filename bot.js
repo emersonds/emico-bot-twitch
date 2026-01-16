@@ -16,7 +16,7 @@ const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
 let COMMANDS_DICTIONARY = new Map();
 COMMANDS_DICTIONARY.set("!socials", "You can find all of Emico's socials on her Carrd! https://emicomirari.carrd.co/");
 COMMANDS_DICTIONARY.set("!discord", "Want to hang out and chat with Emico and the Emigos outside of the stream? Join Emico's Discord! https://discord.gg/7qUXMBQktQ");
-COMMANDS_DICTIONARY.set("!contraption", "contraption");
+//COMMANDS_DICTIONARY.set("!contraption", "contraption");
 COMMANDS_DICTIONARY.set("!quote", "quote");
 
 var websocketSessionID;
@@ -87,9 +87,14 @@ function handleWebSocketMessage(data) {
 					// First, print the message to the program's console.
 					console.log(`MSG #${data.payload.event.broadcaster_user_login} <${data.payload.event.chatter_user_login}> ${data.payload.event.message.text}`);
 
+					// "Split" the chat message to get the first word
+					// This is used to check if the message is a valid command
+					// "!contraption loltyler1" becomes "!contraption"
+					var newChat = [ data.payload.event.message.text.split(' ')[0], data.payload.event.message.text ];
+					//console.log("Shortened chat: " + newChat);
 					// Then check to see if that message is a command
-					if (COMMANDS_DICTIONARY.has(data.payload.event.message.text.trim())) {
-						handleCommands(data.payload.event.message.text.trim());
+					if (COMMANDS_DICTIONARY.has(newChat[0])) {
+						handleCommands(newChat);
 					}
 
 					break;
@@ -100,7 +105,7 @@ function handleWebSocketMessage(data) {
 
 // Responds to a chat command with the expected output
 function handleCommands(chatMessage) {
-	let output = COMMANDS_DICTIONARY.get(chatMessage);
+	let output = COMMANDS_DICTIONARY.get(chatMessage[0]);
 	
 	switch (output) {
 		case "quote":
@@ -109,7 +114,7 @@ function handleCommands(chatMessage) {
 			// track of all of the quotes and their IDs.
 			break;
 		case "contraption":
-			//
+			commandContraption(chatMessage[1]);
 			break;
 		default:
 			sendChatMessage(output)
@@ -247,7 +252,7 @@ function setEnvValue(key, value) {
 // Just used as a meme in chat, does not actually do anything negative
 function commandContraption(chatMessage) {
 	// Remove "!contraption"
-	const newStr = chatMessage.splice(12);
+	const newStr = chatMessage.slice(12);
 
 	// Split message to get each trapped user, where " " is the separator
 	const trappedUsers = newStr.split(" ");
@@ -258,9 +263,20 @@ function commandContraption(chatMessage) {
 	// If multiple users are being put in the contraption
 	if (trappedUsers.length > 1) {
 		for (var i = 0; i < trappedUsers.length; i++) {
-			output += trappedUsers[i] + ", ";
+			// First user
+			if (i == 0) {
+				output += trappedUsers[i] + ", ";
+			}
+			// Last user
+			else if (i == trappedUsers.length) {
+				output += "and " + trappedUsers[i] + " have been thrown into the Contraption™!";
+			}
+			// All other users
+			else {
+				output += trappedUsers[i] + ", ";
+			}
 		}
-		output += "and " + trappedUsers.at(-1) + " have been thrown into the Contraption™!";
+		
 	}
 	else {
 		output = trappedUsers[0] + " has been thrown into the Contraption™!";
