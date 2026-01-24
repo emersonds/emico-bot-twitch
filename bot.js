@@ -9,14 +9,17 @@ const BOT_USER_ID = '1416350263'; // This is the User ID of the chat bot (emicob
 const OAUTH_TOKEN = process.env.OAUTH_TOKEN; // Needs scopes user:bot, user:read:chat, user:write:chat
 const CLIENT_ID = process.env.CLIENT_ID;
 
-const CHAT_CHANNEL_USER_ID = '1395627822'; // This is the User ID of the channel that the bot will join and listen to chat messages of (EmicoMirari)
+const DEV_CHANNEL = '49923915';
+const PROD_CHANNEL = '1395627822';
+
+const CHAT_CHANNEL_USER_ID = DEV_CHANNEL; // This is the User ID of the channel that the bot will join and listen to chat messages of (EmicoMirari)
 
 const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
 
 let COMMANDS_DICTIONARY = new Map();
 COMMANDS_DICTIONARY.set("!socials", "You can find all of Emico's socials on her Carrd! https://emicomirari.carrd.co/");
 COMMANDS_DICTIONARY.set("!discord", "Want to hang out and chat with Emico and the Emigos outside of the stream? Join Emico's Discord! https://discord.gg/7qUXMBQktQ");
-//COMMANDS_DICTIONARY.set("!contraption", "contraption");
+COMMANDS_DICTIONARY.set("!contraption", "contraption");
 COMMANDS_DICTIONARY.set("!quote", "quote");
 
 var websocketSessionID;
@@ -252,23 +255,27 @@ function setEnvValue(key, value) {
 // Just used as a meme in chat, does not actually do anything negative
 function commandContraption(chatMessage) {
 	// Remove "!contraption"
-	const newStr = chatMessage.slice(12);
+	const newStr = chatMessage.trim().slice(13);
 
 	// Split message to get each trapped user, where " " is the separator
 	const trappedUsers = newStr.split(" ");
+
+	console.log(trappedUsers);
 
 	// Final string
 	var output = "";
 
 	// If multiple users are being put in the contraption
-	if (trappedUsers.length > 1) {
+	if (trappedUsers.length > 2) {
 		for (var i = 0; i < trappedUsers.length; i++) {
 			// First user
-			if (i == 0) {
+			if (i === 0) {
+				console.log('i==0');
 				output += trappedUsers[i] + ", ";
 			}
 			// Last user
-			else if (i == trappedUsers.length) {
+			else if (i === (trappedUsers.length - 1)) {
+				console.log("last user");
 				output += "and " + trappedUsers[i] + " have been thrown into the Contraption™!";
 			}
 			// All other users
@@ -277,6 +284,9 @@ function commandContraption(chatMessage) {
 			}
 		}
 		
+	}
+	else if (trappedUsers.length > 1) {
+		output = trappedUsers[0] + " and " + trappedUsers[1] + " have been thrown into the Contraption™!";
 	}
 	else {
 		output = trappedUsers[0] + " has been thrown into the Contraption™!";
