@@ -12,7 +12,7 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const DEV_CHANNEL = '49923915';
 const PROD_CHANNEL = '1395627822';
 
-const CHAT_CHANNEL_USER_ID = DEV_CHANNEL; // This is the User ID of the channel that the bot will join and listen to chat messages of (EmicoMirari)
+const CHAT_CHANNEL_USER_ID = PROD_CHANNEL; // This is the User ID of the channel that the bot will join and listen to chat messages of (EmicoMirari)
 
 const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
 
@@ -20,7 +20,8 @@ let COMMANDS_DICTIONARY = new Map();
 COMMANDS_DICTIONARY.set("!socials", "You can find all of Emico's socials on her Carrd! https://emicomirari.carrd.co/");
 COMMANDS_DICTIONARY.set("!discord", "Want to hang out and chat with Emico and the Emigos outside of the stream? Join Emico's Discord! https://discord.gg/7qUXMBQktQ");
 COMMANDS_DICTIONARY.set("!contraption", "contraption");
-COMMANDS_DICTIONARY.set("!quote", "quote");
+//COMMANDS_DICTIONARY.set("!quote", "quote");
+
 
 var websocketSessionID;
 
@@ -58,6 +59,8 @@ async function getAuth() {
 	}
 
 	console.log("Validated token.");
+	// Send random socials command if token is valid
+	scheduleSocials();
 }
 
 function startWebSocketClient() {
@@ -92,7 +95,7 @@ function handleWebSocketMessage(data) {
 
 					// "Split" the chat message to get the first word
 					// This is used to check if the message is a valid command
-					// "!contraption loltyler1" becomes "!contraption"
+					// "!contraption EmicoMirari" becomes "!contraption"
 					var newChat = [ data.payload.event.message.text.split(' ')[0], data.payload.event.message.text ];
 					//console.log("Shortened chat: " + newChat);
 					// Then check to see if that message is a command
@@ -109,6 +112,8 @@ function handleWebSocketMessage(data) {
 // Responds to a chat command with the expected output
 function handleCommands(chatMessage) {
 	let output = COMMANDS_DICTIONARY.get(chatMessage[0]);
+	console.log("COMMANDS: " + COMMANDS_DICTIONARY.get(chatMessage));
+	console.log("output: " + output);
 	
 	switch (output) {
 		case "quote":
@@ -194,6 +199,7 @@ async function registerEventSubListeners() {
 
 
 // Refreshes the OAuth token with the provided refresh token
+// Not sure if this is working as intended yet so we are using Implicit tokens instead
 // Send an HTTPS POST request with botData and parses response to .env
 async function refreshOauthToken() {
 	//console.log("Entered refreshOauth");
@@ -231,7 +237,7 @@ async function refreshOauthToken() {
 }
 
 
-// Updates .env file values using a regex.
+// Updates .env file values using a regex. Not sure if this is working as intended yet.
 // Credit to Marc on stackoverflow https://stackoverflow.com/a/65001580
 function setEnvValue(key, value) {
 
@@ -293,4 +299,22 @@ function commandContraption(chatMessage) {
 	}
 
 	sendChatMessage(output);
+}
+
+
+// Randomly selects a command to send to chat and repeats every ten minutes.
+// These commands should be related to other social platforms.
+function scheduleSocials() {
+	const commands = [ "!socials", "!discord"];
+	const randomCommand = Math.floor(Math.random() * commands.length);
+	const selectedCommand = [commands[randomCommand], ""];	// bandaid fix for chatMessage[0] in handleCommands()
+
+	console.log("selectedCommand: " + selectedCommand);
+	console.log("command[0]: " + selectedCommand[0]);
+
+	// Call this function every ten minutes
+	setTimeout(() => {
+    handleCommands(selectedCommand);	// Call random socials command
+    scheduleSocials(); // Schedule the next call
+  }, 600000);
 }
