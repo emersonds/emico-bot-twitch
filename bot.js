@@ -9,17 +9,20 @@ const BOT_USER_ID = '1416350263'; // This is the User ID of the chat bot (emicob
 const OAUTH_TOKEN = process.env.OAUTH_TOKEN; // Needs scopes user:bot, user:read:chat, user:write:chat
 const CLIENT_ID = process.env.CLIENT_ID;
 
-const CHAT_CHANNEL_USER_ID = '1395627822'; // This is the User ID of the channel that the bot will join and listen to chat messages of (EmicoMirari)
+const DEV_CHANNEL = '49923915';
+const PROD_CHANNEL = '1395627822';
+
+const CHAT_CHANNEL_USER_ID = PROD_CHANNEL; // This is the User ID of the channel that the bot will join and listen to chat messages of (EmicoMirari)
 
 const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
 
 let COMMANDS_DICTIONARY = new Map();
 COMMANDS_DICTIONARY.set("!socials", "You can find all of Emico's socials on her Carrd! https://emicomirari.carrd.co/");
 COMMANDS_DICTIONARY.set("!discord", "Want to hang out and chat with Emico and the Emigos outside of the stream? Join Emico's Discord! https://discord.gg/7qUXMBQktQ");
-//COMMANDS_DICTIONARY.set("!shoutout", "");
-COMMANDS_DICTIONARY.set("!quote", "quote");
+COMMANDS_DICTIONARY.set("!contraption", "contraption");
+//COMMANDS_DICTIONARY.set("!quote", "quote");
 
-var chatCommand;
+
 var websocketSessionID;
 
 // Start executing the bot from here
@@ -56,6 +59,8 @@ async function getAuth() {
 	}
 
 	console.log("Validated token.");
+	// Send random socials command if token is valid
+	scheduleSocials();
 }
 
 function startWebSocketClient() {
@@ -88,9 +93,14 @@ function handleWebSocketMessage(data) {
 					// First, print the message to the program's console.
 					console.log(`MSG #${data.payload.event.broadcaster_user_login} <${data.payload.event.chatter_user_login}> ${data.payload.event.message.text}`);
 
+					// "Split" the chat message to get the first word
+					// This is used to check if the message is a valid command
+					// "!contraption EmicoMirari" becomes "!contraption"
+					var newChat = [ data.payload.event.message.text.split(' ')[0], data.payload.event.message.text ];
+					//console.log("Shortened chat: " + newChat);
 					// Then check to see if that message is a command
-					if (COMMANDS_DICTIONARY.has(data.payload.event.message.text.trim())) {
-						handleCommands(data.payload.event.message.text.trim());
+					if (COMMANDS_DICTIONARY.has(newChat[0])) {
+						handleCommands(newChat);
 					}
 
 					break;
@@ -101,11 +111,18 @@ function handleWebSocketMessage(data) {
 
 // Responds to a chat command with the expected output
 function handleCommands(chatMessage) {
-	let output = COMMANDS_DICTIONARY.get(chatMessage);
+	let output = COMMANDS_DICTIONARY.get(chatMessage[0]);
+	console.log("COMMANDS: " + COMMANDS_DICTIONARY.get(chatMessage));
+	console.log("output: " + output);
 	
 	switch (output) {
 		case "quote":
-			//
+			// TODO: Add quote command
+			// This will require setting up a database to keep
+			// track of all of the quotes and their IDs.
+			break;
+		case "contraption":
+			commandContraption(chatMessage[1]);
 			break;
 		default:
 			sendChatMessage(output)
@@ -180,8 +197,13 @@ async function registerEventSubListeners() {
 	}
 }
 
+
+// Refreshes the OAuth token with the provided refresh token
+// Not sure if this is working as intended yet so we are using Implicit tokens instead
+// Send an HTTPS POST request with botData and parses response to .env
 async function refreshOauthToken() {
-	console.log("Entered refreshOauth");
+	//console.log("Entered refreshOauth");
+
 	// Set up URLParams for POST request
 	let botData = new URLSearchParams({
 		client_id: process.env.CLIENT_ID,
@@ -190,17 +212,21 @@ async function refreshOauthToken() {
 		grant_type: "refresh_token"
 	});
 
+	// Try refreshing OAuth token
 	try {
+		// HTTPS POST request
 		let response = await fetch('https://id.twitch.tv/oauth2/token', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 			body: botData.toString()
 		});
 
+		// Log errors
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`);
+			throw new Error(`HTTP error! status: ${response.status}\n${response.message}`);
 		}
 
+		// Parse json and update .env file
 		let json = await response.json();
 
 		setEnvValue("OAUTH_TOKEN", json.access_token);
@@ -211,6 +237,7 @@ async function refreshOauthToken() {
 }
 
 
+// Updates .env file values using a regex. Not sure if this is working as intended yet.
 // Credit to Marc on stackoverflow https://stackoverflow.com/a/65001580
 function setEnvValue(key, value) {
 
@@ -227,5 +254,67 @@ function setEnvValue(key, value) {
 
     // write everything back to the file system
     fs.writeFileSync("./.env", ENV_VARS.join(os.EOL));
+}
 
+
+// Gimmick command that "locks" a user in a contraption
+// Just used as a meme in chat, does not actually do anything negative
+function commandContraption(chatMessage) {
+	// Remove "!contraption"
+	const newStr = chatMessage.trim().slice(13);
+
+	// Split message to get each trapped user, where " " is the separator
+	const trappedUsers = newStr.split(" ");
+
+	console.log(trappedUsers);
+
+	// Final string
+	var output = "";
+
+	// If multiple users are being put in the contraption
+	if (trappedUsers.length > 2) {
+		for (var i = 0; i < trappedUsers.length; i++) {
+			// First user
+			if (i === 0) {
+				console.log('i==0');
+				output += trappedUsers[i] + ", ";
+			}
+			// Last user
+			else if (i === (trappedUsers.length - 1)) {
+				console.log("last user");
+				output += "and " + trappedUsers[i] + " have been thrown into the Contraption™!";
+			}
+			// All other users
+			else {
+				output += trappedUsers[i] + ", ";
+			}
+		}
+		
+	}
+	else if (trappedUsers.length > 1) {
+		output = trappedUsers[0] + " and " + trappedUsers[1] + " have been thrown into the Contraption™!";
+	}
+	else {
+		output = trappedUsers[0] + " has been thrown into the Contraption™!";
+	}
+
+	sendChatMessage(output);
+}
+
+
+// Randomly selects a command to send to chat and repeats every ten minutes.
+// These commands should be related to other social platforms.
+function scheduleSocials() {
+	const commands = [ "!socials", "!discord"];
+	const randomCommand = Math.floor(Math.random() * commands.length);
+	const selectedCommand = [commands[randomCommand], ""];	// bandaid fix for chatMessage[0] in handleCommands()
+
+	console.log("selectedCommand: " + selectedCommand);
+	console.log("command[0]: " + selectedCommand[0]);
+
+	// Call this function every ten minutes
+	setTimeout(() => {
+    handleCommands(selectedCommand);	// Call random socials command
+    scheduleSocials(); // Schedule the next call
+  }, 600000);
 }
