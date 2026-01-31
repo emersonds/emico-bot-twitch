@@ -12,7 +12,7 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const DEV_CHANNEL = '49923915';
 const PROD_CHANNEL = '1395627822';
 
-const CHAT_CHANNEL_USER_ID = PROD_CHANNEL; // This is the User ID of the channel that the bot will join and listen to chat messages of (EmicoMirari)
+const CHAT_CHANNEL_USER_ID = DEV_CHANNEL; // This is the User ID of the channel that the bot will join and listen to chat messages of (EmicoMirari)
 
 const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
 
@@ -20,6 +20,7 @@ let COMMANDS_DICTIONARY = new Map();
 COMMANDS_DICTIONARY.set("!socials", "You can find all of Emico's socials on her Carrd! https://emicomirari.carrd.co/");
 COMMANDS_DICTIONARY.set("!discord", "Want to hang out and chat with Emico and the Emigos outside of the stream? Join Emico's Discord! https://discord.gg/7qUXMBQktQ");
 COMMANDS_DICTIONARY.set("!contraption", "contraption");
+COMMANDS_DICTIONARY.set("!lurk", "lurk");
 //COMMANDS_DICTIONARY.set("!quote", "quote");
 
 
@@ -100,6 +101,7 @@ function handleWebSocketMessage(data) {
 					//console.log("Shortened chat: " + newChat);
 					// Then check to see if that message is a command
 					if (COMMANDS_DICTIONARY.has(newChat[0])) {
+						// TODO: Fix command handling to have access to user name/ID
 						handleCommands(newChat);
 					}
 
@@ -123,6 +125,9 @@ function handleCommands(chatMessage) {
 			break;
 		case "contraption":
 			commandContraption(chatMessage[1]);
+			break;
+		case "lurk":
+			commandLurk(chatMessage);
 			break;
 		default:
 			sendChatMessage(output)
@@ -298,6 +303,16 @@ function commandContraption(chatMessage) {
 		output = trappedUsers[0] + " has been thrown into the Contraption™!";
 	}
 
+	sendChatMessage(output);
+}
+
+// Sends a thank you message to the lurking user
+function commandLurk(newChat) {
+	// TODO: Update command to use the user's name.
+	// Can't do this until handleCommands is changed to accept
+	// the whole payload instead of just the message.
+
+	const output = "Thank you for lurking! I appreciate my place on your second monitor emicomHeart";
 	sendChatMessage(output);
 }
 
