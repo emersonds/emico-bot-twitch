@@ -11,6 +11,7 @@ EmicoBot is a Twitch chat bot designed for [Emico Mirari's Twitch stream](https:
 | !socials | Link to Emico's carrd website containing all of her socials.
 | !discord | Link to Emico's discord. |
 | !contraption \[user\] | Send a user to THE CONTRAPTION™! (This is a gimmick command with no negative outcome) |
+| !lurk | Thanks the user who issued the !lurk command for lurking. |
 
 
 ## Can I add it to my channel?
