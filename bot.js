@@ -317,19 +317,21 @@ function commandLurk(newChat) {
 }
 
 
-// Randomly selects a command to send to chat and repeats every ten minutes.
+// Randomly selects a command to send to chat and repeats every 30 minutes.
 // These commands should be related to other social platforms.
 function scheduleSocials() {
 	const commands = [ "!socials", "!discord"];
 	const randomCommand = Math.floor(Math.random() * commands.length);
-	const selectedCommand = [commands[randomCommand], ""];	// bandaid fix for chatMessage[0] in handleCommands()
+	const selectedCommand = [ commands[randomCommand] ]; // This is an array so selectedCommand[0] is the command instead of the first character in the string
+	const timeToWait = 1800 * 1000; // seconds * 1000 to convert to milliseconds
 
 	console.log("selectedCommand: " + selectedCommand);
 	console.log("command[0]: " + selectedCommand[0]);
 
-	// Call this function every ten minutes
-	setTimeout(() => {
     handleCommands(selectedCommand);	// Call random socials command
+	
+	// Call this function every thirty minutes
+	setTimeout(() => {
     scheduleSocials(); // Schedule the next call
-  }, 600000);
+  }, timeToWait);
 }
