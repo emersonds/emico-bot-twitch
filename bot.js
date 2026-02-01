@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import WebSocket from 'ws';
 import os from 'os';
 import fs from 'fs';
