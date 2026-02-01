@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/root/.nvm/versions/node/v25.2.1/bin/node
 import WebSocket from 'ws';
 import os from 'os';
 import fs from 'fs';
