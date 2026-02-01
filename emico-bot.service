@@ -1,0 +1,19 @@
+// Source - https://stackoverflow.com/a/29042953
+// Posted by mikemaccana, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-01-31, License - CC BY-SA 4.0
+
+[Unit]
+Description=Chat bot for Emico Mirari's Twitch channel
+
+[Service]
+ExecStart=/emicobot/emico-bot-twitch/bot.js
+Restart=always
+User=nobody
+# Note Debian/Ubuntu uses 'nogroup', RHEL/Fedora uses 'nobody'
+Group=nogroup
+Environment=PATH=/usr/bin:/usr/local/bin
+Environment=NODE_ENV=production
+WorkingDirectory=/emicobot/emico-bot-twitch/
+
+[Install]
+WantedBy=multi-user.target
