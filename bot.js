@@ -114,7 +114,7 @@ function handleWebSocketMessage(data) {
                                 commandLurk(data.payload.event.chatter_user_name);
                                 break;
                             default:
-                                sendChatMessage(output)
+                                sendChatMessage(COMMANDS_DICTIONARY.get(newChat[0]))
                                 break;
                         }
                     }
