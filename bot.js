@@ -111,7 +111,7 @@ function handleWebSocketMessage(data) {
                                 commandContraption(data.payload.event.message.text);
                                 break;
                             case "lurk":
-                                commandLurk(chatMessage);
+                                commandLurk(data.payload.event.chatter_user_name);
                                 break;
                             default:
                                 sendChatMessage(output)
@@ -125,29 +125,6 @@ function handleWebSocketMessage(data) {
     }
 }
 
-// Responds to a chat command with the expected output
-function handleCommands(chatMessage, chatter) {
-    let output = COMMANDS_DICTIONARY.get(chatMessage[0]);
-    console.log("COMMANDS: " + COMMANDS_DICTIONARY.get(chatMessage));
-    console.log("output: " + output);
-
-    switch (output) {
-        case "quote":
-            // TODO: Add quote command
-            // This will require setting up a database to keep
-            // track of all of the quotes and their IDs.
-            break;
-        case "contraption":
-            commandContraption(chatMessage[1]);
-            break;
-        case "lurk":
-            commandLurk(chatMessage);
-            break;
-        default:
-            sendChatMessage(output)
-            break;
-    }
-}
 
 async function sendChatMessage(chatMessage) {
     let response = await fetch('https://api.twitch.tv/helix/chat/messages', {
@@ -321,28 +298,36 @@ function commandContraption(chatMessage) {
 }
 
 // Sends a thank you message to the lurking user
-function commandLurk(newChat) {
-    // TODO: Update command to use the user's name.
-    // Can't do this until handleCommands is changed to accept
-    // the whole payload instead of just the message.
+function commandLurk(chatter) {
+    const randomLurkMessages = [
+        "Thanks for lurking, " + chatter + "! I'm happy to be on your second monitor! emicomHeart",
+        chatter + " has gone to pick some tulips. Thanks for the lurk!",
+        chatter + " has other Emigo duties to tend to. See you again soon, thanks for lurking!",
+        chatter + " has been distracted by bubbles... Thank you for lurking!"
+    ]
 
-    const output = "Thank you for lurking! I appreciate my place on your second monitor emicomHeart";
-    sendChatMessage(output);
+    // Pick random lurk message
+    const lurkMessage = Math.floor(Math.random() * randomLurkMessages.length);
+
+    sendChatMessage(randomLurkMessages[lurkMessage]);
 }
 
 
 // Randomly selects a command to send to chat and repeats every 30 minutes.
 // These commands should be related to other social platforms.
 function scheduleSocials() {
-    const commands = ["!socials", "!discord"];
-    const randomCommand = Math.floor(Math.random() * commands.length);
-    const selectedCommand = [commands[randomCommand]]; // This is an array so selectedCommand[0] is the command instead of the first character in the string
+    const socialCommands = ["!socials", "!discord"];
+    const randomCommand = Math.floor(Math.random() * socialCommands.length);
+    const selectedCommand = [socialCommands[randomCommand]]; // This is an array so selectedCommand[0] is the command instead of the first character in the string
     const timeToWait = 1800 * 1000; // seconds * 1000 to convert to milliseconds
 
+    /*
     console.log("selectedCommand: " + selectedCommand);
     console.log("command[0]: " + selectedCommand[0]);
+    console.log(COMMANDS_DICTIONARY.get(selectedCommand[0]));
+    */
 
-    handleCommands(selectedCommand);	// Call random socials command
+    sendChatMessage(COMMANDS_DICTIONARY.get(selectedCommand[0]));	// Call random socials command
 
     // Call this function every thirty minutes
     setTimeout(() => {
