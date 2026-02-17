@@ -13,7 +13,7 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const DEV_CHANNEL = '49923915';
 const PROD_CHANNEL = '1395627822';
 
-const CHAT_CHANNEL_USER_ID = DEV_CHANNEL; // This is the User ID of the channel that the bot will join and listen to chat messages of (EmicoMirari)
+const CHAT_CHANNEL_USER_ID = PROD_CHANNEL; // This is the User ID of the channel that the bot will join and listen to chat messages of (EmicoMirari)
 
 const EVENTSUB_WEBSOCKET_URL = 'wss://eventsub.wss.twitch.tv/ws';
 
