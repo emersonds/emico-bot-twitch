@@ -61,7 +61,13 @@ async function getAuth() {
     }
 
     console.log("Validated token.");
-    // Send random socials command if token is valid
+
+    /*
+    * Call scheduleSocials() as soon as the bot is authenticated
+    * so that scheduleSocials() can recursively call itself.
+    * This also gives us a way to verify the OAuth token is still valid,
+    * because the chat bot would not be able to send a message with an invalid token.
+    */
     scheduleSocials();
 }
 
@@ -191,6 +197,44 @@ async function registerEventSubListeners() {
     } else {
         const data = await response.json();
         console.log(`Subscribed to channel.chat.message [${data.data[0].id}]`);
+    }
+
+    // Register channel.raid
+    response = await fetch('https://api.twitch.tv/helix/eventsub/subscriptions', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + OAUTH_TOKEN,
+            'Client-Id': CLIENT_ID,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            type: 'channel.raid',
+            version: '1',
+            condition: {
+                // channel.raid only allows ONE condition, 
+                // The channel starting the raid (from_user_id),
+                // or the channel receiving the raid (to_user_id)
+                from_broadcaster_user_id: CHAT_CHANNEL_USER_ID
+            },
+            transport: {
+                method: 'websocket',
+                session_id: websocketSessionID
+            }
+        })
+    });
+
+    if (response.status != 202) {
+        if (response.status == 401) {
+            refreshOauthToken();
+            registerEventSubListeners();
+        }
+        let data = await response.json();
+        console.error("Failed to subscribe to channel.raid. API call returned status code " + response.status);
+        console.error(data);
+        process.exit(1);
+    } else {
+        const data = await response.json();
+        console.log(`Subscribed to channel.raid [${data.data[0].id}]`);
     }
 }
 
