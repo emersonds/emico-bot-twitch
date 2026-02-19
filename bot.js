@@ -130,8 +130,8 @@ function handleWebSocketMessage(data) {
                 case 'channel.raid':
                     console.log(`RAID #${data.payload.event.broadcaster_user_login} HAS STARTED A RAID`);
 
-                    const raidMessage = "! EMICO RAID emicomHeart EMICO RAID emicomHeart EMICO RAID emicomHeart EMICO RAID emicomHeart EMICO RAID emicomHeart EMICO RAID emicomHeart";
-                    sendChatMessage("Join us in raiding " + data.payload.event.to_broadcaster_user_id + raidMessage);
+                    //const raidMessage = "! EMICO RAID emicomHeart EMICO RAID emicomHeart EMICO RAID emicomHeart EMICO RAID emicomHeart EMICO RAID emicomHeart EMICO RAID emicomHeart";
+                    sendChatMessage("Emico has started a raid! Join us with this message: EMICO RAID emicomHeart EMICO RAID emicomHeart EMICO RAID emicomHeart EMICO RAID emicomHeart");
                     break;
             }
             break;
@@ -220,7 +220,7 @@ async function registerEventSubListeners() {
                 // channel.raid only allows ONE condition, 
                 // The channel starting the raid (from_user_id),
                 // or the channel receiving the raid (to_user_id)
-                to_broadcaster_user_id: CHAT_CHANNEL_USER_ID
+                from_broadcaster_user_id: CHAT_CHANNEL_USER_ID
             },
             transport: {
                 method: 'websocket',
